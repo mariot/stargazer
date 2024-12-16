@@ -18,13 +18,17 @@ github = GitHub(settings.github_api_secret)
 def get_repo_star_neighbours(user: str, repo: str):
     all_stargazers = starred_repos_count_by_stargazers_of_repo(github, user, repo)
     batched_stargazers_ids = group_stargazer_ids_by_star_count(
-        all_stargazers["less_than_100_stars_stargazers"],
+        stargazers=all_stargazers.less_than_100_stars_stargazers,
     )
     less_popular_stargazers = starred_repos_by_batched_user_ids(
-        github, batched_stargazers_ids, f"{user}/{repo}"
+        github=github,
+        user_ids_list=batched_stargazers_ids,
+        ignore_repo=f"{user}/{repo}",
     )
     more_popular_stargazers = starred_repos_by_user_ids(
-        github, all_stargazers["more_than_100_stars_stargazers"], f"{user}/{repo}"
+        github=github,
+        users_list=all_stargazers.more_than_100_stars_stargazers,
+        ignore_repo=f"{user}/{repo}",
     )
     merged_stargazers = less_popular_stargazers | more_popular_stargazers
     return transform_dict_to_list_of_dicts(merged_stargazers)
