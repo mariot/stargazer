@@ -9,6 +9,20 @@ from schema import StargazerWithStarredReposCount, StarredRepoCount
 def starred_repos_count_by_stargazers_of_repo(
     github: GitHub, user: str, repo: str
 ) -> StarredRepoCount:
+    """
+    Fetches the count of starred repositories for each stargazer of a given repository
+    and categorizes them into two lists based on whether they have starred less than
+    or more than 100 repositories.
+
+    Args:
+        github (GitHub): An instance of the GitHub client.
+        user (str): The owner of the repository.
+        repo (str): The name of the repository.
+
+    Returns:
+        StarredRepoCount: An object containing two lists of stargazers, one for those
+        with less than 100 starred repositories and one for those with 100 or more.
+    """
     query = f"""
     query ($user: String!, $repo: String!, $cursor: String) {{
         repository(owner: $user, name: $repo) {{
@@ -57,6 +71,20 @@ def starred_repos_count_by_stargazers_of_repo(
 def starred_repos_by_batched_user_ids(
     github: GitHub, user_ids_list: list[list[str]], ignore_repo: str
 ) -> dict[str, list[str]]:
+    """
+    Fetches the starred repositories for a batch of user IDs and returns a dictionary
+    where the keys are user logins and the values are lists of repository names they have starred,
+    excluding a specified repository.
+
+    Args:
+        github (GitHub): An instance of the GitHub client.
+        user_ids_list (list[list[str]]): A list of lists, where each inner list contains user IDs.
+        ignore_repo (str): The repository to be excluded from the results.
+
+    Returns:
+        dict[str, list[str]]: A dictionary where the keys are user logins and the values are lists
+        of repository names they have starred, excluding the specified repository.
+    """
     query = """
     query StarredRepoByUserIds($ids: [ID!]!) {
       nodes(ids: $ids) {
@@ -88,7 +116,21 @@ def starred_repos_by_batched_user_ids(
 
 def starred_repos_by_user_ids(
     github: GitHub, users_list: List[StargazerWithStarredReposCount], ignore_repo: str
-) -> dict:
+) -> dict[str, list[str]]:
+    """
+    Fetches the starred repositories for a list of users and returns a dictionary
+    where the keys are user logins and the values are lists of repository names they have starred,
+    excluding a specified repository.
+
+    Args:
+        github (GitHub): An instance of the GitHub client.
+        users_list (List[StargazerWithStarredReposCount]): A list of users with their starred repositories count.
+        ignore_repo (str): The repository to be excluded from the results.
+
+    Returns:
+        dict: A dictionary where the keys are user logins and the values are lists
+        of repository names they have starred, excluding the specified repository.
+    """
     query = """
     query StarredRepoByUserId($id: ID!, $cursor: String) {
       node(id: $id) {
@@ -168,6 +210,17 @@ def group_stargazer_ids_by_star_count(
 
 
 def transform_dict_to_list_of_dicts(input_dict):
+    """
+    Transforms a dictionary where keys are stargazers and values are lists of repositories
+    into a list of dictionaries where each dictionary represents a repository and its stargazers.
+
+    Args:
+        input_dict (dict): A dictionary where keys are stargazers and values are lists of repositories.
+
+    Returns:
+        list: A list of dictionaries, each containing a 'repo' key with the repository name
+        and a 'stargazers' key with a list of stargazers who starred the repository.
+    """
     repo_dict = {}
     for stargazer, repos in input_dict.items():
         for repo in repos:
