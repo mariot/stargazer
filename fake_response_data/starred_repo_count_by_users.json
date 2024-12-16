@@ -1,0 +1,28 @@
+{
+  "data": {
+    "repository": {
+      "stargazers": {
+        "nodes": [
+          {
+            "id": "U_kgDOB32z7Q",
+            "login": "bluemoonhorse",
+            "starredRepositories": {
+              "totalCount": 6
+            }
+          },
+          {
+            "id": "U_kgDslkjdfh",
+            "login": "another",
+            "starredRepositories": {
+              "totalCount": 250
+            }
+          }
+        ],
+        "pageInfo": {
+          "endCursor": "Y3Vyc29yOnYyOpK5MjAyNC0xMC0xN1QxMzo1MDoxOCswMjowMM4gGkIW",
+          "hasNextPage": false
+        }
+      }
+    }
+  }
+}

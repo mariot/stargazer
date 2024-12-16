@@ -1,0 +1,27 @@
+{
+  "data": {
+    "node": {
+      "login": "another",
+      "starredRepositories": {
+        "nodes": [
+          {
+            "owner": {
+              "login": "kubernetes"
+            },
+            "name": "kubernetes"
+          },
+          {
+            "owner": {
+              "login": "microsoft"
+            },
+            "name": "vscode"
+          }
+        ],
+        "pageInfo": {
+          "endCursor": "Y3Vyc29yOnYyOpHOColaLw==",
+          "hasNextPage": false
+        }
+      }
+    }
+  }
+}

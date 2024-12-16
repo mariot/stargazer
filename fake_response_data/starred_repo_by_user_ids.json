@@ -1,0 +1,23 @@
+{
+  "data": {
+    "nodes": [
+      {
+        "login": "kevintongg",
+        "starredRepositories": {
+          "nodes": [
+            {
+              "owner": {
+                "login": "Renari"
+              },
+              "name": "Fate-Grand-Order-Translation"
+            }
+          ],
+          "pageInfo": {
+            "endCursor": "Y3Vyc29yOnYyOpHOHnoNYw==",
+            "hasNextPage": false
+          }
+        }
+      }
+    ]
+  }
+}

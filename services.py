@@ -2,12 +2,11 @@ from typing import List
 
 from githubkit import GitHub
 
-from config import settings
 from schema import StargazerWithStarredReposCount, StarredRepoCount
 
 
 def starred_repos_count_by_stargazers_of_repo(
-    github: GitHub, user: str, repo: str
+    github: GitHub, user: str, repo: str, stargazers_per_page: int
 ) -> StarredRepoCount:
     """
     Fetches the count of starred repositories for each stargazer of a given repository
@@ -18,15 +17,16 @@ def starred_repos_count_by_stargazers_of_repo(
         github (GitHub): An instance of the GitHub client.
         user (str): The owner of the repository.
         repo (str): The name of the repository.
+        stargazers_per_page (int): The number of stargazers to fetch per page.
 
     Returns:
         StarredRepoCount: An object containing two lists of stargazers, one for those
         with less than 100 starred repositories and one for those with 100 or more.
     """
     query = f"""
-    query ($user: String!, $repo: String!, $cursor: String) {{
+    query StarredRepoCountByUsers($user: String!, $repo: String!, $cursor: String) {{
         repository(owner: $user, name: $repo) {{
-            stargazers(first: {settings.stargazers_per_page}, after: $cursor) {{
+            stargazers(first: {stargazers_per_page}, after: $cursor) {{
                 nodes {{
                     id
                     login
@@ -115,7 +115,10 @@ def starred_repos_by_batched_user_ids(
 
 
 def starred_repos_by_user_ids(
-    github: GitHub, users_list: List[StargazerWithStarredReposCount], ignore_repo: str
+    github: GitHub,
+    users_list: List[StargazerWithStarredReposCount],
+    ignore_repo: str,
+    max_stars_per_stargazer: int,
 ) -> dict[str, list[str]]:
     """
     Fetches the starred repositories for a list of users and returns a dictionary
@@ -126,6 +129,7 @@ def starred_repos_by_user_ids(
         github (GitHub): An instance of the GitHub client.
         users_list (List[StargazerWithStarredReposCount]): A list of users with their starred repositories count.
         ignore_repo (str): The repository to be excluded from the results.
+        max_stars_per_stargazer (int): The maximum number of stars per stargazer to fetch.
 
     Returns:
         dict: A dictionary where the keys are user logins and the values are lists
@@ -165,13 +169,13 @@ def starred_repos_by_user_ids(
                 ]
             )
             user_stars += 100
-            if user_stars >= settings.max_stars_per_stargazer:
+            if user_stars >= max_stars_per_stargazer:
                 break
     return starred_repos_counts
 
 
 def group_stargazer_ids_by_star_count(
-    stargazers: List[StargazerWithStarredReposCount],
+    stargazers: List[StargazerWithStarredReposCount], max_sublist_length: int
 ) -> list[list[str]]:
     """
     Groups stargazer IDs into sublists where each sublist's total number of stars
@@ -181,6 +185,7 @@ def group_stargazer_ids_by_star_count(
     Args:
         stargazers (List[StargazerWithStarredReposCount]): A list of dictionaries,
         each containing 'id' and 'starred_repos_count' keys.
+        max_sublist_length (int): The maximum number of elements in each sublist.
 
     Returns:
         list[list[str]]: A list of lists, where each inner list contains stargazer IDs.
@@ -195,7 +200,7 @@ def group_stargazer_ids_by_star_count(
             continue
         if (
             current_star_count + starred_repos_count > 100
-            or len(current_group) >= settings.max_sublist_length
+            or len(current_group) >= max_sublist_length
         ):
             grouped_ids.append(current_group)
             current_group = []

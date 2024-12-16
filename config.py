@@ -7,6 +7,3 @@ class Settings(BaseSettings):
     # Should be between 30 and 80.
     stargazers_per_page: int = 10  # The number of stargazers to fetch per page.
     max_stars_per_stargazer: int = 150
-
-
-settings = Settings()
