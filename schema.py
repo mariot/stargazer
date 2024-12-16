@@ -14,3 +14,12 @@ class StargazerWithStarredReposCount(Stargazer):
 class StarredRepoCount(BaseModel):
     less_than_100_stars_stargazers: List[StargazerWithStarredReposCount]
     more_than_100_stars_stargazers: List[StargazerWithStarredReposCount]
+
+
+class ResponseItem(BaseModel):
+    repo: str
+    stargazers: List[str]
+
+
+class FastAPIException(BaseModel):
+    detail: str
