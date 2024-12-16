@@ -1,11 +1,14 @@
 # Test your FastAPI endpoints
 
-GET http://127.0.0.1:8000/
+GET http://127.0.0.1:8000/repos/mariot/brainrot/starneighbours
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/hello/User
+GET http://127.0.0.1:8000/repos/mariot/chan-downloader/starneighbours
 Accept: application/json
 
 ###
+
+GET http://127.0.0.1:8000/repos/mariot/stargazer/starneighbours
+Accept: application/json
