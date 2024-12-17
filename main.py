@@ -1,6 +1,8 @@
+from datetime import timedelta
 from functools import lru_cache
 from typing import Annotated, List
 
+from fastapi.security import OAuth2PasswordRequestForm
 from githubkit import GitHub
 from fastapi import FastAPI, HTTPException, status, Depends
 
@@ -8,7 +10,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 from githubkit.exception import AuthCredentialError, GraphQLFailed
 
 from config import Settings
-from schema import FastAPIException, ResponseItem
+from models import SessionDep, create_db_and_tables, User as UserModel
+from schema import FastAPIException, ResponseItem, Token, User, UserCreate
 from services import (
     group_stargazer_ids_by_star_count,
     starred_repos_by_batched_user_ids,
@@ -16,14 +19,28 @@ from services import (
     starred_repos_count_by_stargazers_of_repo,
     transform_dict_to_list_of_dicts,
 )
+from utils import (
+    authenticate_user,
+    create_access_token,
+    get_current_active_user,
+    get_password_hash,
+)
 
 app = FastAPI()
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
 
 
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+
 @lru_cache
 def get_settings():
     return Settings()
+
+
+SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
 @app.get(
@@ -49,7 +66,10 @@ def get_settings():
     },
 )
 def get_repo_star_neighbours(
-    user: str, repo: str, settings: Annotated[Settings, Depends(get_settings)]
+    user: str,
+    repo: str,
+    settings: Annotated[Settings, Depends(get_settings)],
+    _: Annotated[User, Depends(get_current_active_user)],
 ):
     try:
         github = GitHub(settings.github_api_secret)
@@ -85,3 +105,49 @@ def get_repo_star_neighbours(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except AuthCredentialError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+
+
+@app.post("/token")
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: SessionDep,
+    settings: SettingsDep,
+) -> Token:
+    user = authenticate_user(session, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+    access_token = create_access_token(
+        data={"sub": user.username},
+        secret_key=settings.secret_key,
+        algorithm=settings.algorithm,
+        expires_delta=access_token_expires,
+    )
+    return Token(access_token=access_token, token_type="bearer")
+
+
+@app.get("/users/me/", response_model=User)
+async def read_users_me(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+):
+    return current_user
+
+
+@app.post("/users/", response_model=User)
+async def create_user(user: UserCreate, session: SessionDep):
+    hashed_password = get_password_hash(user.password)
+    new_user = UserModel(
+        username=user.username,
+        email=user.email,
+        full_name=user.full_name,
+        hashed_password=hashed_password,
+        disabled=user.disabled,
+    )
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+    return new_user
