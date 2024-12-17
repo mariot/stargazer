@@ -25,13 +25,13 @@ def get_settings_override():
 app.dependency_overrides[get_settings] = get_settings_override
 
 STARRED_REPO_COUNT_BY_USERS = json.loads(
-    Path("fake_response_data/starred_repo_count_by_users.json").read_text()
+    Path("../fake_response_data/starred_repo_count_by_users.json").read_text()
 )
 STARRED_REPO_BY_USER_IDS = json.loads(
-    Path("fake_response_data/starred_repo_by_user_ids.json").read_text()
+    Path("../fake_response_data/starred_repo_by_user_ids.json").read_text()
 )
 STARRED_REPO_BY_USER_ID = json.loads(
-    Path("fake_response_data/starred_repos_by_user_id.json").read_text()
+    Path("../fake_response_data/starred_repos_by_user_id.json").read_text()
 )
 
 T = TypeVar("T")

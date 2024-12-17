@@ -1,7 +1,7 @@
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Query
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from fastapi import Depends
+from sqlmodel import Field, Session, SQLModel, create_engine
 
 
 class User(SQLModel, table=True):

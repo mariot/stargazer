@@ -8,10 +8,10 @@ from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from sqlmodel import Session
 
-from config import settings
-from models import SessionDep, User as UserModel
+from .config import settings
+from .models import SessionDep, User as UserModel
 
-from schema import TokenData, User, UserInDB
+from .schema import TokenData, User, UserInDB
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

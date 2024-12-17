@@ -9,17 +9,17 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.gzip import GZipMiddleware
 from githubkit.exception import AuthCredentialError, GraphQLFailed
 
-from config import Settings
-from models import SessionDep, create_db_and_tables, User as UserModel
-from schema import FastAPIException, ResponseItem, Token, User, UserCreate
-from services import (
+from .config import Settings
+from .models import SessionDep, create_db_and_tables, User as UserModel
+from .schema import FastAPIException, ResponseItem, Token, User, UserCreate
+from .services import (
     group_stargazer_ids_by_star_count,
     starred_repos_by_batched_user_ids,
     starred_repos_by_user_ids,
     starred_repos_count_by_stargazers_of_repo,
     transform_dict_to_list_of_dicts,
 )
-from utils import (
+from .utils import (
     authenticate_user,
     create_access_token,
     get_current_active_user,
