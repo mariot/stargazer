@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
-from config import Settings
-from main import app, get_settings
+from .config import Settings
+from .main import app, get_settings
 
 import json
 from pathlib import Path
@@ -19,7 +19,7 @@ client = TestClient(app)
 
 
 def get_settings_override():
-    return Settings(github_api_secret="very_secret_very_secure")
+    return Settings(github_api_secret="very_secret_very_secure", secret_key="test")
 
 
 app.dependency_overrides[get_settings] = get_settings_override
